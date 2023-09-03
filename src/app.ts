@@ -1,10 +1,13 @@
 import express from "express";
 import axios, { AxiosResponse } from "axios";
+import FormData from "form-data";
 
 const app = express();
 const port = 5000;
-
-const token = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSWQiOiJhYWMxYmYxNmE2NzUzZThkN2U4MmNhMzQ3NzU4YmNlZWMyMjdlNDgxIiwiZ3JvdXBIYXNEYXRhUHJvY2Vzc2luZ0FncmVlbWVudCI6ZmFsc2UsImlhdCI6MTY5MzE2MjY3NH0.-6tRmBS3tpL_yKKNLFf3O8arSbMgqr1AU4PWVfaWgJUYh6U5oq3l4ZS-4U0Ou1DFZrOeAlI_JU_HtTBFCM5mFg";
+const userCredentials = {
+  password: "BsU^j5oYQNy43FCvPr8%",
+  email: "philip.dein@proton.me"
+};
 
 app.get("/health", (req, res) => {
   res.send("all good");
@@ -19,14 +22,64 @@ app.listen(port, () => {
 // Count all members 24 and under (Disregard all leader-types for members under 25)
 // Find all members without leadership functions and count them
 
-monthlyMemberCount(token)
-  .then(() => {
-    console.log("now what");
-  })
-  .catch(console.error)
 
-async function monthlyMemberCount(token: string) {
-  const allMembers = await getAllMembers(token);
+loginUser()
+  .then(async (sessionId) => {
+    await monthlyMemberCount(sessionId);
+  })
+  .catch(console.error);
+
+async function loginUser(): Promise<string> {
+  const { csrfToken, sessionId } = await getCsrfTokenAndSessionId();
+  const session = authenticate(userCredentials, csrfToken, sessionId);
+  return session;
+}
+
+async function authenticate(credentials, csrfToken, sessionId) {
+  const formData = new FormData();
+  formData.append("login", credentials.email);
+  formData.append("password", credentials.password);
+  formData.append("csrf_token", csrfToken);
+
+  let response: AxiosResponse;
+  try {
+    response = await axios.post("https://medlem.dds.dk/web/login", formData, { headers: {
+      ...formData.getHeaders(),
+      Cookie: `session_id=${sessionId};frontend_lang=da_DDS`
+    }});
+  } catch(error) {
+    //handle wrong creds being used
+    console.error("failed to login to ms", error);
+    throw error;
+  }
+  return getSessionId(response.headers);
+}
+
+async function getCsrfTokenAndSessionId() {
+  let response: AxiosResponse;
+  try {
+    response = await axios.get("https://medlem.dds.dk/web/login");
+  } catch(error) {
+    console.log("error getting CSRF prevention token", error);
+    throw new Error("failed to get CSRF prevention token");
+  }
+  const csrfToken:string = response.data.match(/<input[^>]+name="csrf_token"[^>]+value="([^"]+)"[^>]+>/i)[1];
+  const sessionId:string = getSessionId(response.headers);
+
+  return {
+    csrfToken,
+    sessionId
+  };
+}
+
+function getSessionId(headers) {
+  const setCookie = headers["set-cookie"].find((cookie) => cookie.startsWith("session_id="));
+  const [ _, sessionId ] = setCookie.match(/^session_id=([^;]+);/i);
+  return sessionId;
+}
+
+async function monthlyMemberCount(sessionId: string) {
+  const allMembers = await getAllMembers(sessionId);
   // const youngMembers = getYoungMembers();
   // const getOlderMembers = getOldMembers();
   // const numberOfYoungMembers: number = countMembers();
@@ -35,8 +88,8 @@ async function monthlyMemberCount(token: string) {
   // return memberCount;
 }
 
-async function getAllMembers(token: string) {
-  const data = {
+async function getAllMembers(sessionId: string) {
+  const activeMembersQuery = {
     model: "member.profile",
     fields: [
       "name",
@@ -71,20 +124,25 @@ async function getAllMembers(token: string) {
     sort: "state ASC, name ASC"
   };
 
-  const config = {
-    Headers: {
-      Authorization: `Bearer ${token}`,
-      Cookie: "session_id=2ed1542c44e42fa0dcc2745d458a97b1b2a3001e; HttpOnly;"
-    },
-    
-    data: data
-  };
+  const result = await query(activeMembersQuery, sessionId)
+  console.log(result.result.records);
+}
+
+async function query(params: object, sessionsId: string) {
   let response: AxiosResponse;
   try {
-    response = await axios.post("https://ms-proxy-api.deranged.dk/query", config, { withCredentials: true });
+    response = await axios.post("https://medlem.dds.dk/web/dataset/search_read", {
+      jsonrpc: "2.0",
+      method: "call",
+      params,
+    }, { headers: {
+      Cookie: `session_id=${sessionsId};frontend_lang=da_DDS`
+    }});
   } catch(error) {
     //Probably will have to handle stored user not having access anymore at some point
+    console.error("failed to get all members", error);
     throw error
   }
-  console.log(response.data);
+
+  return response.data;
 }
