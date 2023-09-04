@@ -2,33 +2,41 @@ import express from "express";
 import axios, { AxiosResponse } from "axios";
 import FormData from "form-data";
 
-const app = express();
 const port = 5000;
 const userCredentials = {
   password: "BsU^j5oYQNy43FCvPr8%",
   email: "philip.dein@proton.me"
 };
 
-app.get("/health", (req, res) => {
-  res.send("all good");
-});
+export default async() => {
+  const app = express();
 
-app.listen(port, () => {
-  return console.info(`Server is running on port http://localhost:${port}`);
-});
+  app.get("/health", (req, res) => {
+    res.send("all good");
+  });
+
+  let sessionId: string;
+  try {
+    sessionId = await loginUser();
+  } catch(error) {
+    console.log("failed to login user for some reason", error);
+    throw error;
+  }
+  await monthlyMemberCount(sessionId);
+
+  return app;
+}
+
+
+
+// app.listen(port, () => {
+//   return console.info(`Server is running on port http://localhost:${port}`);
+// });
 
 
 // Get all active members of a group (organization in Odoo)
 // Count all members 24 and under (Disregard all leader-types for members under 25)
 // Find all members without leadership functions and count them
-
-
-loginUser()
-  .then(async (sessionId) => {
-    await monthlyMemberCount(sessionId);
-  })
-  .catch(console.error);
-
 async function loginUser(): Promise<string> {
   const { csrfToken, sessionId } = await getCsrfTokenAndSessionId();
   const session = authenticate(userCredentials, csrfToken, sessionId);
