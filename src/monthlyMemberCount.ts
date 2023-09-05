@@ -2,12 +2,57 @@ import axios, { AxiosResponse } from "axios";
 
 export async function monthlyMemberCount(sessionId: string) {
   const allMembers = await getAllMembers(sessionId);
+  const personnel = await getPersonnel(sessionId);
   // const youngMembers = getYoungMembers();
   // const getOlderMembers = getOldMembers();
   // const numberOfYoungMembers: number = countMembers();
   // const numberOfOlderMember: number = countMembers();
   // const memberCount: number = numberOfOlderMember + numberOfYoungMembers;
   // return memberCount;
+}
+
+async function getPersonnel(sessionId: string) {
+  const activePersonnelQuery = {
+    model: "member.function",
+    domain: [
+        [
+            "is_in_my_organizations",
+            "=",
+            true
+        ],
+        [
+            "active",
+            "=",
+            true
+        ],
+        [
+          "function_type_id",
+          ">",
+          1
+        ]
+    ],
+    fields: [
+        "member_name",
+        "organization_id",
+        "member_number",
+        "member_id",
+        "function_type_id",
+        "active",
+        "leader_function",
+        "board_function"
+    ],
+    limit: 1000,
+    sort: "",
+    context: {
+        "lang": "da_DDS",
+        "tz": "Europe/Copenhagen",
+        "uid": 11552,
+        "show_org_path": true,
+        "limit_orgs": true
+    }
+  }
+  const result = await query(activePersonnelQuery, sessionId);
+  console.log(result.result.records);
 }
 
 async function getAllMembers(sessionId: string) {
@@ -47,7 +92,7 @@ async function getAllMembers(sessionId: string) {
   };
 
   const result = await query(activeMembersQuery, sessionId)
-  console.log(result.result.records);
+  // console.log(result.result.records);
 }
 
 async function query(params: object, sessionsId: string) {
