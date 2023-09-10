@@ -2,9 +2,6 @@ import express from "express";
 import { monthlyMemberCount } from "./monthlyMemberCount";
 import { loginUser } from "./auth";
 
-const port = 5000;
-
-
 export default async() => {
   const app = express();
 
@@ -19,6 +16,7 @@ export default async() => {
     console.log("failed to login user for some reason", error);
     throw error;
   }
+
   await monthlyMemberCount(sessionId);
 
   return app;
