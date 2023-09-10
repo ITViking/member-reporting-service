@@ -37,10 +37,8 @@ async function getPersonnel(sessionId: string) {
     fields: [
         "member_name",
         "organization_id",
-        "member_number",
         "member_id",
         "function_type_id",
-        "active",
         "leader_function",
         "board_function"
     ],
@@ -108,7 +106,7 @@ async function getAllMembers(sessionId: string) {
   };
 
   const result = await query(activeMembersQuery, sessionId)
-  // console.log(result.result.records);
+  return result.result.records;
 }
 
 async function query(params: object, sessionsId: string) {
