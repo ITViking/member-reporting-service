@@ -12,7 +12,16 @@ export interface Role {
 
 export interface UserFunctions {
   memberId: number,
-  functions: Array<MemberServiceId>
+  functions: MemberServiceId[]
+}
+
+export interface Member {
+  id: number,
+  member_id: MemberServiceId,
+  state: string,
+  name: string,
+  age: number,
+  functions: [],
 }
 
 export type MemberServiceId = [number, string];

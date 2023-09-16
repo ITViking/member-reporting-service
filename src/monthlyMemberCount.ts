@@ -1,11 +1,11 @@
-import axios, { AxiosResponse } from "axios";
-import { UserFunctions, Role, MemberServiceId } from "./interfaces";
+import axios, { AxiosResponse, all } from "axios";
+import { UserFunctions, Role, MemberServiceId, Member } from "./interfaces";
 
 export async function monthlyMemberCount(sessionId: string) {
   const allMembers = await getAllMembers(sessionId);
-  let membersWithFunctions;
-  const functions = await getPersonnel(sessionId);
-  // membersWithFunctions = await assignMembersTheirFunctions(allMembers, functions);
+  const personnel = await getPersonnel(sessionId);
+  const members = await assignMembersTheirFunctions(allMembers, personnel);
+  console.log(members);
   // const youngMembers = getYoungMembers();
   // const getOlderMembers = getOldMembers();
   // const numberOfYoungMembers: number = countMembers();
@@ -69,10 +69,21 @@ function groupFunctionsByMember(functions: Role[]) {
   return functionsGroupedByUser;
 }
 
+function assignMembersTheirFunctions(members:Member[], functions: {})  {
+  return members.map((member) => {
+    const id:string = member.member_id[0].toString();
+    if(functions.hasOwnProperty(id)) {
+      member.functions = functions[id];
+    }
+    return member;
+  })
+}
+
 async function getAllMembers(sessionId: string) {
   const activeMembersQuery = {
     model: "member.profile",
     fields: [
+      "member_id",
       "name",
       "age",
       "state"
