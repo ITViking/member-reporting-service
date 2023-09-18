@@ -3,18 +3,52 @@ import { UserFunctions, Role, MemberServiceId, Member } from "./interfaces";
 
 export async function monthlyMemberCount(sessionId: string) {
   const allMembers = await getAllMembers(sessionId);
-  const personnel = await getPersonnel(sessionId);
-  const members = await assignMembersTheirFunctions(allMembers, personnel);
-  console.log(members);
-  // const youngMembers = getYoungMembers();
-  // const getOlderMembers = getOldMembers();
+  const functions = await getFunctions(sessionId);
+  const members = await assignMembersTheirFunctions(allMembers, functions);
+  const youngMembers = members.filter((member: Member) => member.age < 25);
+  const olderMembers = getOldMembers(members);
+  const personnel = getPersonnel(members);
+
   // const numberOfYoungMembers: number = countMembers();
   // const numberOfOlderMember: number = countMembers();
   // const memberCount: number = numberOfOlderMember + numberOfYoungMembers;
   // return memberCount;
 }
 
-async function getPersonnel(sessionId: string) {
+function getPersonnel(members: Member[]) {
+  return members.filter((member: Member) => member.age > 25 && memberIsPersonnel(member.functions));
+}
+
+function getOldMembers(members: Member[]) {
+  return members.filter((member: Member) => member.age > 25 && !memberIsPersonnel(member.functions));
+}
+
+const leaderAndBoardFunctions = {
+  233: "Bestyrelsesformand",
+  234: "Gruppeleder",
+  235: "Afdelingsleder",
+  236: "Afdelingsassistent",
+  240: "Bladmodtager",
+  252: "Medlemsansvarlig",
+  273: "Gruppekorpsrådsmedlem",
+  274: "Offentlig kontaktperson",
+  275: "Webansvarlig",
+  285: "Gruppekasserer",
+  288: "Bestyrelsesmedlem",
+  290: "Leder i bestyrelsen",
+  305: "Grupperevisor",
+  318: "Divisionsrådsmedlem",
+  327: "Økonomiansvarlig",
+  364: "Enhedsansvarlig",
+  894: "Børneattest påkrævet",
+};
+
+const memberIsPersonnel = (functions: MemberServiceId[]) => {
+  if(!functions) return false;
+  return functions.some((role) => role[0] in leaderAndBoardFunctions);
+}
+
+async function getFunctions(sessionId: string) {
   const activePersonnelQuery = {
     model: "member.function",
     domain: [
@@ -138,5 +172,3 @@ async function query(params: object, sessionsId: string) {
 
   return response.data;
 }
-
-
