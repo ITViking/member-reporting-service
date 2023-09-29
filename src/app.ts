@@ -1,5 +1,5 @@
 import express from "express";
-import { monthlyMemberCount } from "./monthlyMemberCount";
+import { createMemberCountAndCompositionReport } from "./monthlyMemberCount";
 import { loginUser } from "./auth";
 import { Db } from "mongodb";
 
@@ -12,6 +12,7 @@ export default async(db: Db) => {
     res.send("all good");
   });
 
+  const start = Date.now();
   let sessionId: string;
   try {
     sessionId = await loginUser();
@@ -20,12 +21,8 @@ export default async(db: Db) => {
     throw error;
   }
 
-  await monthlyMemberCount(sessionId);
-
+  await createMemberCountAndCompositionReport(sessionId);
+  const end = Date.now();
+  console.log(`run time: ${(end-start)/1000} seconds`);
   return app;
 }
-
-// Get all active members of a group (organization in Odoo)
-// Count all members 24 and under (Disregard all leader-types for members under 25)
-// Find all members without leadership functions and count them
-

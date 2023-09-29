@@ -23,7 +23,7 @@ function getOldMembers(members: Member[]) {
   return members.filter((member: Member) => member.age > 25 && !memberIsPersonnel(member.functions));
 }
 
-const leaderAndBoardFunctions = {
+const leaderAndBoardFunctionsKey = {
   233: "Bestyrelsesformand",
   234: "Gruppeleder",
   235: "Afdelingsleder",
@@ -45,7 +45,7 @@ const leaderAndBoardFunctions = {
 
 const memberIsPersonnel = (functions: MemberServiceId[]) => {
   if(!functions) return false;
-  return functions.some((role) => role[0] in leaderAndBoardFunctions);
+  return functions.some((role) => role[0] in leaderAndBoardFunctionsKey);
 }
 
 async function getFunctions(sessionId: string) {
