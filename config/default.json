@@ -1,0 +1,6 @@
+{
+  "mongodb": {
+    "uri": "mongodb://msskal:msskal@localhost:27017/msskal?directConnection=true",
+    "db": "msskal" 
+  }
+}
