@@ -1,18 +1,21 @@
 import axios, { AxiosResponse, all } from "axios";
-import { UserFunctions, Role, MemberServiceId, Member } from "./interfaces";
+import { Role, MemberServiceId, Member } from "./interfaces";
 
-export async function monthlyMemberCount(sessionId: string) {
+export async function createMemberCountAndCompositionReport(sessionId: string) {
   const allMembers = await getAllMembers(sessionId);
   const functions = await getFunctions(sessionId);
   const members = await assignMembersTheirFunctions(allMembers, functions);
   const youngMembers = members.filter((member: Member) => member.age < 25);
   const olderMembers = getOldMembers(members);
   const personnel = getPersonnel(members);
-
-  // const numberOfYoungMembers: number = countMembers();
-  // const numberOfOlderMember: number = countMembers();
-  // const memberCount: number = numberOfOlderMember + numberOfYoungMembers;
-  // return memberCount;
+  console.log(`
+    Unge: ${youngMembers.length},
+    25 og over: ${olderMembers.length},
+    Ledere (ikke 24 og under): ${personnel.length}
+    Total: ${personnel.length + olderMembers.length + youngMembers.length}
+  `)
+  console.log(JSON.stringify({youngMembers, olderMembers, personnel}).length);
+  const report = Report.save(youngMembers, olderMembers, personnel);
 }
 
 function getPersonnel(members: Member[]) {
