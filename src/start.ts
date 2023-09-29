@@ -1,13 +1,19 @@
+import { Db, MongoClient } from 'mongodb';
 import smacker from  "smacker";
 import app from "./app";
+import config from 'config';
 
 (async function() {
-    const server = await app();
-    let service;
-    smacker.start({
-        start: () => {
-          service = server.listen(5000, '0.0.0.0')
-        },
-        stop: () => service.close()
-    });
+  const mongoClient = new MongoClient(config.get("mongodb.connectionString"));
+  await mongoClient.connect();
+  const db:Db = mongoClient.db(config.get("mongodb.db"));
+
+  const server = await app(db);
+  let service;
+  smacker.start({
+      start: () => {
+        service = server.listen(5000, '0.0.0.0')
+      },
+      stop: () => service.close()
+  });
 })();
