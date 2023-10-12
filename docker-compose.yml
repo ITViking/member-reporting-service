@@ -1,0 +1,12 @@
+version: '3.5'
+services:
+  mongodb:
+    image: bitnami/mongodb:latest
+    expose:
+      - 27017
+    environment:
+      - MONGODB_USERNAME=msskal
+      - MONGODB_PASSWORD=msskal
+      - MONGODB_DATABASE=msskal
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb
+      - MONGODB_ROOT_PASSWORD=msskal

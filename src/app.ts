@@ -21,7 +21,7 @@ export default async(db: Db) => {
     throw error;
   }
 
-  await createMemberCountAndCompositionReport(sessionId);
+  await createMemberCountAndCompositionReport(Reports, sessionId);
   const end = Date.now();
   console.log(`run time: ${(end-start)/1000} seconds`);
   return app;

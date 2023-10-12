@@ -4,8 +4,9 @@ import app from "./app";
 import config from 'config';
 
 (async function() {
-  const mongoClient = new MongoClient(config.get("mongodb.connectionString"));
+  const mongoClient = new MongoClient(config.get("mongodb.url"));
   await mongoClient.connect();
+  console.log("do we get this far?")
   const db:Db = mongoClient.db(config.get("mongodb.db"));
 
   const server = await app(db);

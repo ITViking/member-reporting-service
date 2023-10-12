@@ -1,7 +1,8 @@
-import axios, { AxiosResponse, all } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { Role, MemberServiceId, Member } from "./interfaces";
+import { Collection } from "mongodb";
 
-export async function createMemberCountAndCompositionReport(sessionId: string) {
+export async function createMemberCountAndCompositionReport(Reports: Collection, sessionId: string) {
   const allMembers = await getAllMembers(sessionId);
   const functions = await getFunctions(sessionId);
   const members = await assignMembersTheirFunctions(allMembers, functions);
@@ -15,7 +16,8 @@ export async function createMemberCountAndCompositionReport(sessionId: string) {
     Total: ${personnel.length + olderMembers.length + youngMembers.length}
   `)
   console.log(JSON.stringify({youngMembers, olderMembers, personnel}).length);
-  const report = Report.save(youngMembers, olderMembers, personnel);
+  const report = { youngMembers, olderMembers, personnel};
+  const reportDoc = await Reports.insertOne(report);
 }
 
 function getPersonnel(members: Member[]) {
