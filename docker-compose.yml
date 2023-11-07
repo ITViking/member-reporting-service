@@ -2,8 +2,8 @@ version: '3.5'
 services:
   mongodb:
     image: bitnami/mongodb:latest
-    expose:
-      - 27017
+    ports:
+      - 27017:27017
     environment:
       - MONGODB_USERNAME=msskal
       - MONGODB_PASSWORD=msskal
