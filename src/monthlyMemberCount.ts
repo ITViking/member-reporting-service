@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { Role, MemberServiceId, Member } from "./interfaces";
+import { Role, MemberServiceId, Member } from "./types";
 import { Collection } from "mongodb";
 
 export async function createMemberCountAndCompositionReport(Reports: Collection, sessionId: string) {
