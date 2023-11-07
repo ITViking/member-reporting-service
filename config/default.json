@@ -1,4 +1,5 @@
 {
+  "port": 5000,
   "mongodb": {
     "url": "mongodb://msskal:msskal@localhost:27017/msskal?authSource=msskal&directConnection=true",
     "db": "msskal"
