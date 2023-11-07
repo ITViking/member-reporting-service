@@ -1,6 +1,6 @@
 {
   "mongodb": {
-    "url": "mongodb://msskal:msskal@localhost:27017/msskal?authSource=admin&directConnection=true",
-    "db": "msskal" 
+    "url": "mongodb://msskal:msskal@localhost:27017/msskal?authSource=msskal&directConnection=true",
+    "db": "msskal"
   }
 }
