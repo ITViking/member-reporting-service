@@ -1,5 +1,5 @@
 import express from "express";
-import { createMemberCountAndCompositionReport } from "./monthlyMemberCount";
+import { createMemberCountAndCompositionReport } from "./createMemberCountAndCompositionReport";
 import { loginUser } from "./auth";
 import { Db } from "mongodb";
 

@@ -1,4 +1,4 @@
-export interface Role {
+export type Role = {
   id: number,
   organization_id: MemberServiceId,
   member_id: MemberServiceId,
@@ -10,12 +10,12 @@ export interface Role {
   board_function: boolean
 }
 
-export interface UserFunctions {
+export type UserFunctions = {
   memberId: number,
   functions: MemberServiceId[]
 }
 
-export interface Member {
+export type Member = {
   id: number,
   member_id: MemberServiceId,
   state: string,

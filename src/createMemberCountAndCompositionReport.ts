@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { Role, MemberServiceId, Member } from "./interfaces";
+import { Role, MemberServiceId, Member } from "./types";
 import { Collection } from "mongodb";
 
 export async function createMemberCountAndCompositionReport(Reports: Collection, sessionId: string) {
@@ -15,9 +15,8 @@ export async function createMemberCountAndCompositionReport(Reports: Collection,
     Ledere (ikke 24 og under): ${personnel.length}
     Total: ${personnel.length + olderMembers.length + youngMembers.length}
   `)
-  console.log(JSON.stringify({youngMembers, olderMembers, personnel}).length);
   const report = { youngMembers, olderMembers, personnel};
-  const reportDoc = await Reports.insertOne(report);
+  await Reports.insertOne(report);
 }
 
 function getPersonnel(members: Member[]) {
@@ -155,7 +154,7 @@ async function getAllMembers(sessionId: string) {
     sort: "state ASC, name ASC"
   };
 
-  const result = await query(activeMembersQuery, sessionId)
+  const result = await query(activeMembersQuery, sessionId);
   return result.result.records;
 }
 
@@ -166,9 +165,11 @@ async function query(params: object, sessionsId: string) {
       jsonrpc: "2.0",
       method: "call",
       params,
-    }, { headers: {
-      Cookie: `session_id=${sessionsId};frontend_lang=da_DDS`
-    }});
+    }, {
+      headers: {
+        Cookie: `session_id=${sessionsId};frontend_lang=da_DDS`
+      }
+    });
   } catch(error) {
     //Probably will have to handle stored user not having access anymore at some point
     console.error("failed to get all members", error);
